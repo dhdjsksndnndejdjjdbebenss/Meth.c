@@ -12,7 +12,17 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(imgui)
 add_subdirectory(dobby)
 
-add_library(meth SHARED meth.cpp)
+# This time we are explicitly adding the ImGui source files
+add_library(meth SHARED 
+    meth.cpp
+    ${imgui_SOURCE_DIR}/imgui.cpp
+    ${imgui_SOURCE_DIR}/imgui_draw.cpp
+    ${imgui_SOURCE_DIR}/imgui_tables.cpp
+    ${imgui_SOURCE_DIR}/imgui_widgets.cpp
+    ${imgui_SOURCE_DIR}/backends/imgui_impl_android.cpp
+    ${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3.cpp
+)
+
 target_include_directories(meth PRIVATE ${imgui_SOURCE_DIR} ${imgui_SOURCE_DIR}/backends)
 target_link_libraries(meth dobby log android dl EGL GLESv2)
 target_compile_options(meth PRIVATE -s -fvisibility=hidden)
