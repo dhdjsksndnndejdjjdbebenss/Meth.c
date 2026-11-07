@@ -16,18 +16,21 @@ jobs:
       - name: Get Latest Dobby
         run: git clone --depth 1 https://github.com/jmpews/Dobby.git dobby
 
-      - name: Fix Assembly Errors with Python
+      - name: Fix Assembly Errors
         run: |
-          python3 -c "
+          cat > fix.py << 'EOF'
           import os
           for root, dirs, files in os.walk('dobby'):
               for file in files:
                   if file.endswith('.asm') or file.endswith('.S'):
                       p = os.path.join(root, file)
-                      with open(p, 'r', errors='ignore') as f: txt = f.read()
+                      with open(p, 'r', errors='ignore') as f:
+                          txt = f.read()
                       txt = txt.replace('@PAGE', '').replace('@PAGEOFF', ' :lo12:')
-                      with open(p, 'w') as f: f.write(txt)
-          "
+                      with open(p, 'w') as f:
+                          f.write(txt)
+          EOF
+          python3 fix.py
 
       - name: Compile
         run: |
@@ -42,4 +45,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: meth-lib
-          path: libaudioplugin.so 
+          path: libaudioplugin.so
