@@ -7,12 +7,11 @@ include(FetchContent)
 FetchContent_Declare(
     imgui
     GIT_REPOSITORY https://github.com/ocornut/imgui.git
-    GIT_TAG docking 
+    GIT_TAG v1.90.1
 )
 FetchContent_MakeAvailable(imgui)
 add_subdirectory(dobby)
 
-# This time we are explicitly adding the ImGui source files
 add_library(meth SHARED 
     meth.cpp
     ${imgui_SOURCE_DIR}/imgui.cpp
@@ -24,6 +23,9 @@ add_library(meth SHARED
 )
 
 target_include_directories(meth PRIVATE ${imgui_SOURCE_DIR} ${imgui_SOURCE_DIR}/backends)
+
+# THIS IS THE FIX: Add -DIMGUI_IMPL_OPENGL_ES2 so it knows it's on a phone
+target_compile_options(meth PRIVATE -s -fvisibility=hidden -DIMGUI_IMPL_OPENGL_ES2)
+
 target_link_libraries(meth dobby log android dl EGL GLESv2)
-target_compile_options(meth PRIVATE -s -fvisibility=hidden)
 set_target_properties(meth PROPERTIES PREFIX "lib")
