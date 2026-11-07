@@ -11,15 +11,23 @@ jobs:
         uses: nttld/setup-ndk@v1
         id: setup-ndk
         with:
-          ndk-version: r23b
+          ndk-version: r25c
 
       - name: Get Latest Dobby
         run: git clone --depth 1 https://github.com/jmpews/Dobby.git dobby
 
-      - name: Fix Assembly Errors safely
+      - name: Fix Assembly Errors with Python
         run: |
-          # This uses 'find' instead of 'grep', so it will never crash.
-          find dobby -type f \( -name "*.asm" -o -name "*.S" \) -exec sed -i 's/@PAGE//g; s/@PAGEOFF/ :lo12:/g' {} +
+          python3 -c "
+          import os
+          for root, dirs, files in os.walk('dobby'):
+              for file in files:
+                  if file.endswith('.asm') or file.endswith('.S'):
+                      p = os.path.join(root, file)
+                      with open(p, 'r', errors='ignore') as f: txt = f.read()
+                      txt = txt.replace('@PAGE', '').replace('@PAGEOFF', ' :lo12:')
+                      with open(p, 'w') as f: f.write(txt)
+          "
 
       - name: Compile
         run: |
@@ -34,4 +42,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: meth-lib
-          path: libaudioplugin.so
+          path: libaudioplugin.so 
